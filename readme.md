@@ -16,3 +16,5 @@
     'phonenumber_field',
     ...
 ]
+    token授权
+    pip install djangorestframework-jwt

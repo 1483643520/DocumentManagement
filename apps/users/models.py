@@ -1,41 +1,35 @@
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
 from django.core.validators import validate_comma_separated_integer_list
+from django.contrib.auth.models import AbstractUser
 
 
 # Create your models here.
 
 
-class User(models.Model):
+class UserModel(AbstractUser):
     """
     存储用户信息表
     """
     # 性别分组
     Gender_ = ((1, "男"), (2, "女"), (3, "其他"))
-    # 用户状态分组
-    Status_ = ((1, "在用"), (2, "停用"))
-    # 级别分组
-    Level_ = ((1, "管理员"), (2, "普通用户"))
-    user_name = models.CharField(help_text="用户名", verbose_name="用户名", max_length=10)
     nickname = models.CharField(help_text="昵称", verbose_name="昵称", max_length=50, default="", blank=True, null=True)
     gender = models.IntegerField(help_text="性别:1男、2女，3其他", verbose_name="性别", choices=Gender_)
     phone = PhoneNumberField(help_text="电话", verbose_name="电话", default="", blank=True, null=True)
-    email = models.EmailField(help_text="邮箱", verbose_name="邮箱")
-    status = models.IntegerField(help_text="在用状态:1在用、2停用", verbose_name="在用状态")
-    level = models.IntegerField(help_text="用户级别:1管理员、2普通用户", verbose_name="用户级别")
-    last_time = models.DateTimeField(help_text="上次登录时间", verbose_name="上次登录时间")
     superior_role = models.CharField(help_text="所关联角色", verbose_name="所关联角色", max_length=255,
                                      validators=[validate_comma_separated_integer_list], default="", blank=True,
                                      null=True)
-    update_time = models.DateTimeField(help_text="上次修改时间", verbose_name="上次修改时间", auto_now=True)
-    create_time = models.DateTimeField(help_text="创建时间", verbose_name="创建时间", auto_now_add=True)
 
     class Meta:
         db_table = "tb_user"
         verbose_name = "用户注册表"
+        verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return str(self.username)
 
 
-class Directory(models.Model):
+class DirectoryModel(models.Model):
     """
     目录配置表
     """
@@ -56,7 +50,7 @@ class Directory(models.Model):
         verbose_name = "目录配置表"
 
 
-class Menu(models.Model):
+class MenuModel(models.Model):
     """
     菜单配置表
     """
@@ -86,7 +80,7 @@ class Menu(models.Model):
         verbose_name = "菜单配置表"
 
 
-class Button(models.Model):
+class ButtonModel(models.Model):
     """
     按钮配置表
     """
@@ -101,7 +95,7 @@ class Button(models.Model):
         verbose_name = "按钮配置表"
 
 
-class UserRole(models.Model):
+class UserRoleModel(models.Model):
     """
     角色配置表
     关联用户、关联功能配置

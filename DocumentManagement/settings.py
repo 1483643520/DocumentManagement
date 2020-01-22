@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 
 import os
 import time
+import datetime
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -29,6 +30,7 @@ ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -36,10 +38,20 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "corsheaders",
     "rest_framework",
     "phonenumber_field",
     "apps.users",
 ]
+
+# 重载用户表
+AUTH_USER_MODEL = "users.UserModel"
+
+# 添加跨域白名单
+# 任何接口均可访问
+CORS_ORIGIN_ALLOW_ALL = True
+# 可以访问列表
+# CORS_ORIGIN_WHITELITST = []
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -121,22 +133,43 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-# noinspection SpellCheckingInspection
+
+
 REST_FRAMEWORK = {
-    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend",
+    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.backends.DjangoFilterBackend",
                                 "rest_framework.filters.OrderingFilter"],
-    "DEFAULT_PAGINATIION_CLASS": "utility.pagination.ManualPageNumberPagination",
-    "PAGE_SIZE": 3,
-    "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.coreapi.AutoSchema",
+    "DEFAULT_PAGINATION_CLASS": "untils.pagination.ManualPageNumberPagination",
+    "PAGE_SIZE": 2,
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.AutoSchema',
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication'
+        # 使用token认证
+        # DRF 框架默认情况下，使用的是用户会话认证
+        # 'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework.authentication.BasicAuthentication'
+        # 指定JWT Token认证
+        "rest_framework_jwt.authentication.JSONWebTokenAuthentication",
     ],
+    # 授权类
     'DEFAULT_PERMISSION_CLASSES': [
+        # 默认任何情况都可以访问
         'rest_framework.permissions.AllowAny',
-    ]
+        # 只有登录才可以访问接口
+        # 'rest_framework.permissions.IsAuthenticated',
+        # 只有管理员用户才可以访问
+        # 'rest_framework.permissions.IsAdminUser',
+        # 不登录时只能访问获取数据接口
+        # 'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ],
 }
 
+JWT_AUTH = {
+    # 配置token过期时间，默认为5分钟
+    "JWT_EXPIRATION_DELTA": datetime.timedelta(days=1),
+    # 前端请求头 token 前缀
+    "JWT_AUTH_HEADER_PREFIX": "JWT",
+    # 指定自定义返回值
+    "JWT_RESPONSE_PAYLOAD_HANDLER": "untils.jwt_handler.jwt_response_payload_handler",
+}
 cur_path = os.path.dirname(os.path.realpath(__file__))  # log_path是存放日志的路径
 # noinspection PyUnresolvedReferences
 log_path = os.path.join(os.path.dirname(cur_path), 'logs')
